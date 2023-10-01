@@ -1,0 +1,46 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:15
+    container_name: pgr_webapp
+    volumes:
+      - ~/.pg/pg_data/webap:/var/lib/postgresql/data
+    env_file:
+      - .env
+  
+  webapp:
+    image: webapp_django:latest
+    container_name: web_app
+    depends_on:
+      - db
+    volumes:
+      - static_volume:/yt/static
+      - media_volume:/yt/media
+    env_file:
+      - .env
+    environment:
+      - DJANGO_SUPERUSER_USERNAME=root1
+      - DJANGO_SUPERUSER_PASSWORD=admin
+      - DJANGO_SUPERUSER_EMAIL=admin@example.com
+    command: >
+      bash -c "./manage.py collectstatic --noinput && ./manage.py migrate && ./manage.py createsuperuser --noinput && gunicorn -b 0.0.0.0:8000 webapp.wsgi:application"
+ 
+  nginx:
+    build:
+      dockerfile: ./Dockerfile
+      context: ./docker/nginx/
+    container_name: webapp_nginx
+    image: webapp_nginx
+    volumes:
+      - static_volume:/webapp/static
+      - media_volume:/webapp/media
+    depends_on:
+      - webapp
+    ports:
+      - "${NGINX_EXTERNAL_PORT}:80"
+
+
+volumes:
+  static_volume:
+  media_volume:
