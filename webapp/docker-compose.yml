@@ -3,14 +3,14 @@ version: "3.9"
 services:
   db:
     image: postgres:15
-    container_name: pgr_webapp
+    container_name: pgr_web
     volumes:
       - ~/.pg/pg_data/webap:/var/lib/postgresql/data
     env_file:
       - .env
   
   webapp:
-    image: webapp_django:latest
+    image: smirnovdaniill/webapp_django:v1.0
     container_name: web_app
     depends_on:
       - db
@@ -20,7 +20,7 @@ services:
     env_file:
       - .env
     environment:
-      - DJANGO_SUPERUSER_USERNAME=root1
+      - DJANGO_SUPERUSER_USERNAME=adm
       - DJANGO_SUPERUSER_PASSWORD=admin
       - DJANGO_SUPERUSER_EMAIL=admin@example.com
     command: >
@@ -31,7 +31,7 @@ services:
       dockerfile: ./Dockerfile
       context: ./docker/nginx/
     container_name: webapp_nginx
-    image: webapp_nginx
+    image: smirnovdaniill/webapp_nginx:v1.0 
     volumes:
       - static_volume:/webapp/static
       - media_volume:/webapp/media
